@@ -1,0 +1,166 @@
+class ListNode {
+         val: number
+         next: ListNode | null
+         constructor(val?: number, next?: ListNode | null) {
+             this.val = (val===undefined ? 0 : val)
+             this.next = (next===undefined ? null : next)
+    }
+}
+
+export function mergeTwoListsBetterRecursion(list1: ListNode | null, list2: ListNode | null): ListNode | null {
+    /* This one uses nice recursion way, which always thought was possible */
+    if (list1 === null) { 
+        return list2 
+    } if (list2 === null) { 
+        return list1 
+    }
+    if (list1.val < list2.val) { 
+        list1.next = mergeTwoListsBetterRecursion(list1.next, list2); 
+        return list1 
+    } else { 
+        list2.next = mergeTwoListsBetterRecursion(list1, list2.next); 
+        return list2 
+    }
+}
+
+export function mergeTwoListsBetter(list1: ListNode | null, list2: ListNode | null): ListNode | null {
+    /* Research: Singly Linked List */
+    // Improvement: don't do bespoke Head logic at start. 
+    // Can perform naturally inside
+
+    // Improvement: To store the start, use a dummy node. Will use to return .next only as the Head
+    // Improvement: Call the pointer tail instead (more expressive)
+    let dummyNode:ListNode = new ListNode(0, null);
+    let tail:ListNode = dummyNode;
+
+    // Improvement: Can just use while True and break when needed
+    while (true) {
+        // Improvement: Null linking and checking, don't need to check if non-null now
+        // Improvement: Can break when first is null
+        if (list1 === null) {
+            // Improvement: Tail is the pointer to simply assign .next to each time
+            // I was instead assigning the .next against list1/list2 direct
+            // But thats not needed given the tail gets assigned live node each time
+            tail.next = list2;
+            break;
+        } if (list2 === null) {
+            tail.next = list1;
+            break;
+        }
+        // Now both are non-null, can proceed normally
+        if (list1.val <= list2.val){
+            tail.next = list1;
+            tail = list1;
+            list1 = list1.next;
+        } else {
+            tail.next = list2;
+            tail = list2;
+            list2 = list2.next;
+        }
+        // console.log(list1);
+        // console.log(list2);
+    }
+    return dummyNode.next;
+}
+
+export function mergeTwoLists(list1: ListNode | null, list2: ListNode | null): ListNode | null {
+    /*
+    My idea here was:
+    1. Assign the head. 
+        This had problem that the function needs to return the head
+        But the pointer tracking stuff was being reassigned
+        So leads to duplicated code...
+    2. Assign pointer as the head. That is temp node that follows along
+    3. While either list are nonnull:
+        If list1 < list2, set pointer to list1
+        There is then a messy check (replicated for head)
+        That takes into account if the next in list1 is null, should instead link list2
+
+    To improve:
+    - The if else logic is crazy and complicated
+    - Better handling of assigning and returning the head
+    - Is the while loop best? Or can is it better done recursively?
+    */
+    
+    // The merged list isn't a direct object. 
+    // Its the linked nature of the node object references
+
+    // If list1 empty, list2 populated, remainder is simply the other list
+    let head:ListNode|null = null;
+    if (list1 !== null && list2 === null) {
+        head = list1;
+        if (list1.next === null) {
+            list1.next = list2;
+            list1 = null;
+        } else {
+            list1 = list1.next;
+        }
+    } else if (list1 === null && list2 !== null) {
+        head = list2;
+        if (list2.next === null) {
+            list2.next = list1;
+            list2 = null;
+        } else {
+            list2 = list2.next;
+        }
+    } else if (list1 !== null && list2 !== null){
+        if (list2.val < list1.val) {
+            head = list2;
+            if (list2.next === null) {
+                list2.next = list1;
+                list2 = null;
+            } else {
+                list2 = list2.next;
+            }
+        } else {
+            head = list1;
+            if (list1.next === null) {
+                list1.next = list2;
+                list1 = null;
+            } else {
+                list1 = list1.next;
+            }
+            
+        }
+    }
+
+    let pointer:ListNode|null = head;
+
+    // Keep going until one is null. Can then stop
+    while (list1 !== null && list2 !== null && pointer !== null) {
+        console.log(list1);
+        console.log(list2);
+        if (list1.val <= list2.val) {
+            pointer.next = list1;
+            pointer = list1;
+            // Got to make link list2 if last is null
+            if (list1.next === null){
+                list1.next = list2;
+                list1 = null;
+            } else {
+                list1 = list1.next;
+            }
+            
+        }            
+        else {
+            pointer.next = list2;
+            pointer = list2;
+            // Got to make link list1 if last is null
+            if (list2.next === null){
+                list2.next = list1;
+                list2 = null;
+            } else {
+                list2 = list2.next;
+            }
+        }
+    }
+    
+    return head;
+}
+
+
+export function mergeTwoListsCase() {
+    let list1 = new ListNode(1, new ListNode(2, new ListNode(4, null)));
+    let list2 = new ListNode(1, new ListNode(3, new ListNode(4, null)));
+    mergeTwoListsBetter(list1, list2);
+}
